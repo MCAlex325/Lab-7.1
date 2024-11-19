@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34622.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lab-7", "Lab-7.csproj", "{CADF1FA9-219F-4488-AFAB-31061784F690}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BA4F111E-FA4A-4D73-B010-C9C5CE9CF4CF}"
+	ProjectSection(SolutionItems) = preProject
+		Interface.cs = Interface.cs
+		Program.cs = Program.cs
+		Reservation_Manager_Class.cs = Reservation_Manager_Class.cs
+		Restaurant_Class.cs = Restaurant_Class.cs
+		Restaurant_Table_Class.cs = Restaurant_Table_Class.cs
+		Table_Reservation_App.cs = Table_Reservation_App.cs
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CADF1FA9-219F-4488-AFAB-31061784F690}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CADF1FA9-219F-4488-AFAB-31061784F690}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CADF1FA9-219F-4488-AFAB-31061784F690}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CADF1FA9-219F-4488-AFAB-31061784F690}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D903562F-4244-4452-BF8F-911A45E107AE}
+	EndGlobalSection
+EndGlobal

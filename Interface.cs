@@ -2,18 +2,18 @@
 
 namespace TableReservationApp
 {
-    public interface IRestaurantManager
+    public interface IRestaurantService
     {
         void AddRestaurant(string name, int tables);
         List<string> FindAllFreeTables(DateTime dateTime);
+        void SortRestaurantsByAvailability(DateTime dateTime);
     }
-    public interface ITableBooking
+    public interface ITableBookingService
     {
-        bool BookTable(string resName, DateTime date, int tableNumber);
+        bool BookTable(string restaurantName, DateTime date, int tableNumber);
     }
     public interface IRestaurantRepository
     {
         void LoadRestaurantsFromFile(string file);
-        void SaveRestaurantsToFile(string file);
     }
 }

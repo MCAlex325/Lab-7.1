@@ -4,14 +4,15 @@ using System.IO;
 
 namespace TableReservationApp
 {
-    public class ReservationManagerClass : IRestaurantManager, ITableBooking, IRestaurantRepository
+    public class RestaurantService : IRestaurantService
     {
         private List<RestaurantClass> restaurants;
 
-        public ReservationManagerClass()
+        public RestaurantService()
         {
             restaurants = new List<RestaurantClass>();
         }
+
         public void AddRestaurant(string name, int tables)
         {
             RestaurantClass restaurant = new RestaurantClass
@@ -27,8 +28,69 @@ namespace TableReservationApp
             restaurants.Add(restaurant);
         }
 
-        // Load Restaurants From
-        // File
+        public List<string> FindAllFreeTables(DateTime dateTime)
+        {
+            List<string> freeTables = new List<string>();
+            foreach (var restaurant in restaurants)
+            {
+                for (int i = 0; i < restaurant.tables.Length; i++)
+                {
+                    if (!restaurant.tables[i].IsBooked(dateTime))
+                    {
+                        freeTables.Add($"{restaurant.name} - Table {i + 1}");
+                    }
+                }
+            }
+            return freeTables;
+        }
+
+        public void SortRestaurantsByAvailability(DateTime dateTime)
+        {
+            restaurants = restaurants
+                .OrderByDescending(r => r.tables.Count(t => !t.IsBooked(dateTime)))
+                .ToList();
+        }
+
+        public List<RestaurantClass> GetRestaurants()
+        {
+            return restaurants;
+        }
+    }
+    public class TableBookingService : ITableBookingService
+    {
+        private List<RestaurantClass> restaurants;
+
+        public TableBookingService(List<RestaurantClass> restaurantList)
+        {
+            restaurants = restaurantList;
+        }
+
+        public bool BookTable(string restaurantName, DateTime date, int tableNumber)
+        {
+            foreach (var res in restaurants)
+            {
+                Console.WriteLine($"Checking restaurant: '{res.name}'");
+                if (res.name == restaurantName.Trim())
+                {
+                    if (tableNumber < 0 || tableNumber >= res.tables.Length)
+                    {
+                        throw new Exception("Invalid table number");
+                    }
+                    return res.tables[tableNumber].Book(date);
+                }
+            }
+            throw new Exception("Invalid restaurant name or table number");
+        }
+    }
+    public class RestaurantFileRepository : IRestaurantRepository
+    {
+        private IRestaurantService _restaurantService;
+
+        public RestaurantFileRepository(IRestaurantService restaurantService)
+        {
+            _restaurantService = restaurantService;
+        }
+
         public void LoadRestaurantsFromFile(string file)
         {
             try
@@ -37,118 +99,25 @@ namespace TableReservationApp
                 {
                     throw new FileNotFoundException($"File not found: {file}");
                 }
+
                 string[] lines = File.ReadAllLines(file);
                 foreach (string line in lines)
                 {
                     var parts = line.Split(',');
                     if (parts.Length != 2 || !int.TryParse(parts[1], out int tableCount))
                     {
-                        throw new FormatException($"Invalid format in line: \"{line}\". Expected fomat: \"RestaurantNAme,CountOfTables\"");
+                        throw new FormatException($"Invalid format in line: \"{line}\". Expected format: \"RestaurantName,TableCount\"");
                     }
-                    
-                    AddRestaurant(parts[0], tableCount);
+
+                    _restaurantService.AddRestaurant(parts[0].Trim(), tableCount);
+                    Console.WriteLine($"Restaurant added: {parts[0].Trim()}, Tables: {tableCount}");
+
                 }
             }
-            catch (FileNotFoundException FNFEx)
-            { 
-                Console.WriteLine($"Error: \n{FNFEx.Message}");
-                Environment.Exit(1);
-            }
-            catch (FormatException FEx)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Error: \n{FEx.Message}");
-                Environment.Exit(2);
-            }
-            catch (Exception Ex)
-            {
-                Console.WriteLine($"An unexpected error occured: \n{Ex.Message}");
-                Environment.Exit(3);
-            }
-        }
-
-        public void SaveRestaurantsToFile(string file)
-        {
-            var lines = restaurants.Select(r => $"{r.name},{r.tables.Length}");
-            File.WriteAllLines(file, lines);
-        }
-
-        //Find All Free Tables
-        public List<string> FindAllFreeTables(DateTime dateTime)
-        {
-            List<string> freeTables = new List<string>();
-            foreach (var res in restaurants)
-            {
-                for (int i = 0; i < res.tables.Length; i++)
-                {
-                    if (!res.tables[i].IsBooked(dateTime))
-                    {
-                            freeTables.Add($"{res.name} - Table {i + 1}");
-                    }
-                }
-            }
-            return freeTables;
-        }
-
-        public bool BookTable(string resName, DateTime date, int tableNumber)
-        {
-            var restaurant = restaurants.FirstOrDefault(r => r.name == resName);
-            if (restaurant == null || tableNumber < 0 || tableNumber >= restaurant.tables.Length)
-            {
-                throw new ArgumentException("Invalid restaurant name or table number");
-            }
-            return restaurant.tables[tableNumber].Book(date);
-        }
-
-        public void SortRestaurantsByAvailabilityForUsers(DateTime dateTime)
-        {
-            try
-            {
-                bool swapped;
-                do
-                {
-                    swapped = false;
-                    for (int i = 0; i < restaurants.Count - 1; i++)
-                    {
-                        int available_tables_current = CountOfAvailableTablesInARestaurant(restaurants[i], dateTime);
-                        int available_tables_next = CountOfAvailableTablesInARestaurant(restaurants[i + 1], dateTime);
-
-                        if (available_tables_current < available_tables_next)
-                        {
-                            // Swap restaurants
-                            var temp = restaurants[i];
-                            restaurants[i] = restaurants[i + 1];
-                            restaurants[i + 1] = temp;
-                            swapped = true;
-                        }
-                    }
-                } while (swapped);
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine("Error");
-            }
-        }
-
-        public int CountOfAvailableTablesInARestaurant(RestaurantClass restaurant, DateTime dateTime)
-        {
-            try
-            {
-                int count = 0;
-                foreach (var table in restaurant.tables)
-                {
-                    if (!table.IsBooked(dateTime))
-                    {
-                        count++;
-                    }
-                }
-                return count;
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine("Error");
-                return 0;
+                Console.WriteLine($"Error loading restaurants: {ex.Message}");
             }
         }
     }
-
 }
